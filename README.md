@@ -2,6 +2,10 @@
 
 A React TypeScript spreadsheet with formula calculations and multi-tab synchronization.
 
+## Live Demo
+
+[https://tech-test-9823.vercel.app](https://tech-test-9823.vercel.app)
+
 ## Running the Project
 
 **One command setup:**
