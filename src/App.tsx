@@ -7,6 +7,8 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const COLUMNS = ["A", "B", "C", "D", "E"];
 const ROW_COUNT = 10;
 
+const broadcastChannel = new BroadcastChannel("grid-sync");
+
 type RowData = {
   [key: string]: string;
 };
@@ -24,6 +26,13 @@ const initRowData = (): RowData[] => {
 function App() {
   const [rowData, setRowData] = useState<RowData[]>(initRowData());
   console.log("rowData :>> ", rowData);
+
+  broadcastChannel.onmessage = (event) => {
+    console.log("broadcast event :>> ", event);
+    if (event.data.type === "dataUpdate") {
+      setRowData(event.data.rowData);
+    }
+  };
 
   const columnDefs = COLUMNS.map((col) => ({
     field: col,
@@ -46,6 +55,11 @@ function App() {
     { type: "module" }
   );
 
+  const dataUpdate = (rowData: RowData[]) => {
+    setRowData(rowData);
+    broadcastChannel.postMessage({ type: "dataUpdate", rowData });
+  };
+
   const handleCellValueChange = (event: any) => {
     const updatedRowData = [...rowData];
     const { rowIndex, colDef, value } = event;
@@ -65,13 +79,12 @@ function App() {
 
         const result = e.data?.result;
         updatedRowData[rowIndex][colDef.field] = result.toString();
-        setRowData(updatedRowData);
+        dataUpdate(updatedRowData);
       };
     } else {
       updatedRowData[rowIndex][colDef.field] = value;
+      dataUpdate(updatedRowData);
     }
-
-    setRowData(updatedRowData);
   };
 
   return (
