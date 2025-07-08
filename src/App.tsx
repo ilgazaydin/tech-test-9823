@@ -1,35 +1,91 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
+import { AgGridReact } from "ag-grid-react";
+
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+const COLUMNS = ["A", "B", "C", "D", "E"];
+const ROW_COUNT = 10;
+
+type RowData = {
+  [key: string]: string;
+};
+
+const initRowData = (): RowData[] => {
+  return Array.from({ length: ROW_COUNT }, () => {
+    const row: RowData = {};
+    COLUMNS.forEach((col) => {
+      row[col] = "";
+    });
+    return row;
+  });
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [rowData, setRowData] = useState<RowData[]>(initRowData());
+  console.log("rowData :>> ", rowData);
+
+  const columnDefs = COLUMNS.map((col) => ({
+    field: col,
+    editable: true,
+  }));
+
+  const generateCellMap = (data: RowData[]) => {
+    const cellMap: { [key: string]: string } = {};
+    data.forEach((row, rowIndex) => {
+      Object.keys(row).forEach((col) => {
+        const cellKey = `${col}${rowIndex + 1}`;
+        cellMap[cellKey] = row[col];
+      });
+    });
+    return cellMap;
+  };
+
+  const calculateFormula = (
+    formula: string,
+    cellMap: { [key: string]: string }
+  ) => {
+    try {
+      const sanitizedFormula = formula.replace(/([A-Z]\d+)/g, (match) => {
+        return cellMap[match] || "0";
+      });
+      const result = eval(sanitizedFormula);
+      return result;
+    } catch (error) {
+      console.error("Error evaluating formula:", error);
+      return "NaN";
+    }
+  };
+
+  const handleCellValueChange = (event: any) => {
+    const updatedRowData = [...rowData];
+    const { rowIndex, colDef, value } = event;
+    console.log("rowIndex, colDef, value :>> ", rowIndex, colDef, value);
+
+    if (value.startsWith("=")) {
+      const cellMap = generateCellMap(updatedRowData);
+      console.log("cellMap :>> ", cellMap);
+      const formulaResult = calculateFormula(value.slice(1), cellMap);
+      console.log("formulaResult :>> ", formulaResult);
+      updatedRowData[rowIndex][colDef.field] = formulaResult.toString();
+    } else {
+      updatedRowData[rowIndex][colDef.field] = value;
+    }
+
+    setRowData(updatedRowData);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div style={{ width: "100%", height: "500px" }}>
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={columnDefs}
+          onCellValueChanged={handleCellValueChange}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
