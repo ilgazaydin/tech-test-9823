@@ -41,6 +41,7 @@ export const SpreadsheetGrid = () => {
       COLUMNS.map((col) => ({
         field: col,
         editable: true,
+        flex: 1,
         cellClassRules: {
           "flash-red": (params: CellClassParams) => {
             const val = parseFloat(params.value);
@@ -116,7 +117,7 @@ export const SpreadsheetGrid = () => {
 
   return (
     <>
-      <div style={{ width: "100%", height: "500px" }}>
+      <div style={{ width: "100%", height: "100vh" }}>
         <AgGridReact
           rowData={rowData}
           columnDefs={columnDefs}
