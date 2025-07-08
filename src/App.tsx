@@ -41,21 +41,10 @@ function App() {
     return cellMap;
   };
 
-  const calculateFormula = (
-    formula: string,
-    cellMap: { [key: string]: string }
-  ) => {
-    try {
-      const sanitizedFormula = formula.replace(/([A-Z]\d+)/g, (match) => {
-        return cellMap[match] || "0";
-      });
-      const result = eval(sanitizedFormula);
-      return result;
-    } catch (error) {
-      console.error("Error evaluating formula:", error);
-      return "NaN";
-    }
-  };
+  const formulaWorker = new Worker(
+    new URL("./formulaWorker.ts", import.meta.url),
+    { type: "module" }
+  );
 
   const handleCellValueChange = (event: any) => {
     const updatedRowData = [...rowData];
@@ -64,10 +53,20 @@ function App() {
 
     if (value.startsWith("=")) {
       const cellMap = generateCellMap(updatedRowData);
-      console.log("cellMap :>> ", cellMap);
-      const formulaResult = calculateFormula(value.slice(1), cellMap);
-      console.log("formulaResult :>> ", formulaResult);
-      updatedRowData[rowIndex][colDef.field] = formulaResult.toString();
+      const formula = value.slice(1);
+
+      formulaWorker.postMessage({
+        formula,
+        cellMap,
+      });
+
+      formulaWorker.onmessage = (e) => {
+        console.log("e :>> ", e);
+
+        const result = e.data?.result;
+        updatedRowData[rowIndex][colDef.field] = result.toString();
+        setRowData(updatedRowData);
+      };
     } else {
       updatedRowData[rowIndex][colDef.field] = value;
     }
