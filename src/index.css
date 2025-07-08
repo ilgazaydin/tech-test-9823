@@ -66,3 +66,16 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.flash-red {
+  animation: flashRed 0.5s ease-out;
+}
+
+@keyframes flashRed {
+  0% {
+    background-color: #ff7a7a;
+  }
+  100% {
+    background-color: transparent;
+  }
+}

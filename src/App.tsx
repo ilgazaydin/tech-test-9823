@@ -26,6 +26,13 @@ const initRowData = (): RowData[] => {
 function App() {
   const [rowData, setRowData] = useState<RowData[]>(initRowData());
   console.log("rowData :>> ", rowData);
+  const [lastUpdatedCell, setLastUpdatedCell] = useState<{
+    row: number | null;
+    col: string | null;
+  }>({
+    row: null,
+    col: null,
+  });
 
   broadcastChannel.onmessage = (event) => {
     console.log("broadcast event :>> ", event);
@@ -37,6 +44,16 @@ function App() {
   const columnDefs = COLUMNS.map((col) => ({
     field: col,
     editable: true,
+    cellClassRules: {
+      "flash-red": (params: any) => {
+        const val = parseFloat(params.value);
+        const isNegative = !isNaN(val) && val < 0;
+        const isJustUpdated =
+          lastUpdatedCell?.row === params.node.rowIndex &&
+          lastUpdatedCell?.col === params.colDef.field;
+        return isJustUpdated && isNegative;
+      },
+    },
   }));
 
   const generateCellMap = (data: RowData[]) => {
@@ -63,6 +80,10 @@ function App() {
   const handleCellValueChange = (event: any) => {
     const updatedRowData = [...rowData];
     const { rowIndex, colDef, value } = event;
+    setLastUpdatedCell({
+      row: rowIndex,
+      col: colDef.field,
+    });
     console.log("rowIndex, colDef, value :>> ", rowIndex, colDef, value);
 
     if (value.startsWith("=")) {
