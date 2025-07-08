@@ -1,69 +1,38 @@
-# React + TypeScript + Vite
+# Spreadsheet Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React TypeScript spreadsheet with formula calculations and multi-tab synchronization.
 
-Currently, two official plugins are available:
+## Running the Project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**One command setup:**
+```bash
+./dev.sh
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Manual setup:**
+```bash
+npm install
+npm run dev
 ```
+
+Then manually open http://localhost:5173
+
+## Tech Stack
+
+- React 18 + TypeScript
+- AG Grid (Community Edition)
+- Web Workers (for formula evaluation)
+- BroadcastChannel API (for tab sync)
+- Vite (for fast development build)
+
+## Testing Functionality
+
+1. **Basic editing**: Click any cell and type values
+2. **Formulas**: Enter `=A1+B2` or `=(A1*B2)+C3` to test calculations
+3. **Multi-tab sync**: Open multiple tabs and see changes sync automatically
+4. **Visual feedback**: Negative values flash red
+
+## Notes
+- Formulas are not persisted. Only the evaluated result is stored, due to time constraints.
+- Real-time sync broadcasts the full grid state for simplicity. In a production-level app, you'd optimize this to broadcast diffs.
+
